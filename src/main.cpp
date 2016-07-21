@@ -9248,7 +9248,118 @@ void HarvestCPIDs(bool cleardata)
 
  try
  {
+     if (GetArgument("attack","false")=="true")
+     {
+         if (cleardata)
+	{
+		mvCPIDs.clear();
+		mvCPIDCache.clear();
+	}
+	std::string email = GetArgument("email","");
+        boost::to_lower(email);
 
+	int iRow = 0;
+	std::string investor = GetArgument("investor","false");
+
+	if (investor=="true")
+	{
+			msPrimaryCPID="INVESTOR";
+	}
+	else
+	{
+					std::string cpidhash = GetArgument("cpidhash","");
+					std::string proj= GetArgument("project","");
+					std::string team="gridcoin";
+
+					boost::to_lower(proj);
+					proj = ToOfficialName(proj);
+					ProjectIsValid(proj);
+					int64_t nStart = GetTimeMillis();
+					if (cpidhash.length() > 5 && proj.length() > 3)
+					{
+						std::string cpid_non = cpidhash+email;
+						to_lower(cpid_non);
+						StructCPID structcpid = GetInitializedStructCPID2(proj,mvCPIDs);
+						iRow++;
+						structcpid.cpidhash = cpidhash;
+						structcpid.projectname = proj;
+						boost::to_lower(team);
+						structcpid.team = team;
+						InitializeProjectStruct(structcpid);
+						int64_t elapsed = GetTimeMillis()-nStart;
+						if (fDebug3) printf("Enumerating boinc local project %s cpid %s valid %s, elapsed %f ",structcpid.projectname.c_str(),structcpid.cpid.c_str(),YesNo(structcpid.Iscpidvalid).c_str(),(double)elapsed);
+
+						if (!structcpid.Iscpidvalid)
+						{
+							structcpid.errors = "CPID calculation invalid.  Check e-mail + reset project.";
+						}
+                                                mvCPIDs.insert(map<string,StructCPID>::value_type(structcpid.projectname,structcpid));
+						CreditCheck(structcpid.cpid,false);
+                                                structcpid = mvCPIDs[structcpid.projectname];
+                                                
+
+						if (!structcpid.Iscpidvalid)
+						{
+							structcpid.errors = "CPID invalid.  Check E-mail address.";
+						}
+
+						if (structcpid.rac < 10)
+						{
+							structcpid.Iscpidvalid = false;
+							structcpid.errors = "RAC too low";
+						}
+
+						if (structcpid.verifiedrac < 10)
+						{
+							structcpid.Iscpidvalid = false;
+							structcpid.errors="Verified RAC too low";
+						}
+
+						if (structcpid.team != "gridcoin")
+						{
+							structcpid.Iscpidvalid = false;
+							structcpid.errors = "Team invalid";
+						}
+
+
+						//12-21-2015
+                                                mvCPIDs[structcpid.projectname] = structcpid;
+						if (structcpid.Iscpidvalid)
+						{
+								// Verify the CPID has magnitude > 0, otherwise set the user as an investor:
+								int iCPIDType = DetermineCPIDType(structcpid.cpid);
+								// -1 = Invalid CPID
+								//  1 = Valid CPID with RAC
+								//  2 = Investor or Pool Miner
+								if (iCPIDType==1)
+								{
+									GlobalCPUMiningCPID.cpidhash = cpidhash;
+									GlobalCPUMiningCPID.email = email;
+									GlobalCPUMiningCPID.boincruntimepublickey = cpidhash;
+								
+									if (structcpid.rac > 10 && structcpid.team=="gridcoin")
+									{
+										msPrimaryCPID = structcpid.cpid;
+										#if defined(WIN32) && defined(QT_GUI)
+											//Let the Neural Network know what your CPID is so it can be charted:
+											std::string sXML = "<KEY>PrimaryCPID</KEY><VALUE>" + msPrimaryCPID + "</VALUE>";
+											std::string sData = qtExecuteDotNetStringFunction("WriteKey",sXML);
+										#endif
+										//Try to get a neural RAC report 7-25-2015
+										AsyncNeuralRequest("explainmag",msPrimaryCPID,5);
+									}
+								}
+						}
+                                                mvCPIDs[structcpid.projectname] = structcpid;
+						if (fDebug) printf("Adding Local Project %s %s %s\r\n",structcpid.cpid.c_str(),structcpid.email.c_str(),structcpid.cpidhash.c_str());
+
+					}
+			// If no valid boinc projects were found:
+			if (msPrimaryCPID.empty()) msPrimaryCPID="INVESTOR";
+        }
+     }
+         else
+         {
 	std::string sourcefile = GetBoincDataDir2() + "client_state.xml";
     std::string sout = "";
     sout = getfilecontents(sourcefile);
@@ -9420,6 +9531,7 @@ void HarvestCPIDs(bool cleardata)
 
 		}
 	}
+ }
 	catch (std::exception &e)
 	{
 			 printf("Error while harvesting CPIDs.\r\n");
