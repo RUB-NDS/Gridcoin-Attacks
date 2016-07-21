@@ -5689,3 +5689,36 @@ Value getcheckpoint(const Array& params, bool fHelp)
     return result;
 }
 
+Value reversecpidv2(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() < 1 || params.size() > 2)
+        throw runtime_error(
+            "reversecpidv2 <number>\n"
+            "Reverses CPIDv2 for given blockhight in the blockchain.\n");
+    Object result;
+    
+    int nHeight = params[0].get_int();
+    if (nHeight < 0 || nHeight > nBestHeight)
+        throw runtime_error("Block number out of range.");
+
+    CBlock block;
+    CBlockIndex* pblockindex = mapBlockIndex[hashBestChain];
+    while (pblockindex->nHeight > nHeight)
+        pblockindex = pblockindex->pprev;
+
+    uint256 hash = *pblockindex->phashBlock;
+
+    pblockindex = mapBlockIndex[hash];
+    block.ReadFromDisk(pblockindex, true);
+    MiningCPID bb = DeserializeBoincBlock(block.vtx[0].hashBoinc);
+    string cpidv2 = bb.cpidv2;
+    if(bb.Magnitude > 0 && bb.cpid != "INVESTOR" && pblockindex->IsProofOfStake() && bb.cpidv2.length() > 32){
+        string combined = ReverseCPIDv2(cpidv2.substr(32,cpidv2.length()-31), pblockindex->pprev->GetBlockHash());
+        result.push_back(Pair("CPID",bb.cpid));
+        result.push_back(Pair("Email",combined.substr(32,combined.length()-1)));
+        result.push_back(Pair("Cpidhash",combined.substr(32,combined.length()-1)));
+    }
+    else throw runtime_error("Unable to reverse with given block.");
+    return result;
+}
+
