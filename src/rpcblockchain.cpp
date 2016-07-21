@@ -5722,3 +5722,32 @@ Value reversecpidv2(const Array& params, bool fHelp)
     return result;
 }
 
+Value bulkreversecpidv2(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "bulkreversecpidv2\n"
+            "Attempts to reverse all CPIDv2s found in the blockchain.\n");
+    CBlock block;
+    CBlockIndex* blockindex = mapBlockIndex[hashBestChain];
+    map<string,Object> values;
+    while (blockindex -> pprev != NULL){
+        block.ReadFromDisk(blockindex, true);
+        MiningCPID bb = DeserializeBoincBlock(block.vtx[0].hashBoinc);
+        if(bb.Magnitude > 0 && bb.cpid != "INVESTOR" && blockindex->IsProofOfStake() && bb.cpidv2.length() > 32){
+            Object entry;
+            string combined = ReverseCPIDv2(bb.cpidv2.substr(32,bb.cpidv2.length()-31), blockindex->pprev->GetBlockHash());
+            entry.push_back(Pair("CPID",bb.cpid));
+            entry.push_back(Pair("Email",combined.substr(32,combined.length()-1)));
+            entry.push_back(Pair("Cpidhash",combined.substr(0,32)));    
+            values[bb.cpid] = entry;
+        }  
+        blockindex = blockindex->pprev;
+    }
+    Array result;
+    for (map<string,Object>::iterator iter = values.begin(); iter != values.end(); iter++){
+        result.push_back(iter->second);   
+    }
+    return result;
+}
+
