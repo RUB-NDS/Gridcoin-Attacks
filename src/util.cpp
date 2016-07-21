@@ -60,13 +60,13 @@ using namespace std;
 
 map<string, string> mapArgs;
 map<string, vector<string> > mapMultiArgs;
-bool fDebug = false;
-bool fDebugNet = false;
-bool fDebug2 = false;
-bool fDebug3 = false;
-bool fDebug4 = false;
-bool fDebug5 = false;
-bool fDebug10 = false;
+bool fDebug = true;
+bool fDebugNet = true;
+bool fDebug2 = true;
+bool fDebug3 = true;
+bool fDebug4 = true;
+bool fDebug5 = true;
+bool fDebug10 = true;
 
 bool fPrintToConsole = false;
 bool fPrintToDebugger = false;

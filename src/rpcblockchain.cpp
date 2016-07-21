@@ -453,7 +453,7 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fPri
 	}
 	
 	result.push_back(Pair("Magnitude", bb.Magnitude));
-	if (fDebug3) result.push_back(Pair("BoincHash",block.vtx[0].hashBoinc));
+	result.push_back(Pair("BoincHash",block.vtx[0].hashBoinc));
 	result.push_back(Pair("LastPaymentTime",TimestampToHRDate(bb.LastPaymentTime)));
 
 	result.push_back(Pair("ResearchSubsidy",bb.ResearchSubsidy));
@@ -475,7 +475,7 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fPri
 	}
 	else
 	{
-		if (bb.cpidv2.length() > 10) 	result.push_back(Pair("CPIDv2",bb.cpidv2.substr(0,32)));
+		if (bb.cpidv2.length() > 10) 	result.push_back(Pair("CPIDv2",bb.cpidv2));
 		bool IsCPIDValid2 = IsCPIDValidv2(bb,blockindex->nHeight);
 		result.push_back(Pair("CPIDValid",IsCPIDValid2));
 	}
@@ -5627,7 +5627,7 @@ Value listitem(const Array& params, bool fHelp)
 					entry.push_back(Pair("CPID",structcpid.cpid));
 					entry.push_back(Pair("RAC",structcpid.rac));
 					entry.push_back(Pair("Team",structcpid.team));
-					//entry.push_back(Pair("Is my CPID Valid?",structcpid.Iscpidvalid));
+					entry.push_back(Pair("Is my CPID Valid?",structcpid.Iscpidvalid));
 					entry.push_back(Pair("CPID Link",structcpid.link));
 					entry.push_back(Pair("Debug Info",structcpid.errors));
 					results.push_back(entry);
