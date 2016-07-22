@@ -5716,7 +5716,7 @@ Value reversecpidv2(const Array& params, bool fHelp)
         string combined = ReverseCPIDv2(cpidv2.substr(32,cpidv2.length()-31), pblockindex->pprev->GetBlockHash());
         result.push_back(Pair("CPID",bb.cpid));
         result.push_back(Pair("Email",combined.substr(32,combined.length()-1)));
-        result.push_back(Pair("Cpidhash",combined.substr(32,combined.length()-1)));
+        result.push_back(Pair("Cpidhash",combined.substr(0,32)));
     }
     else throw runtime_error("Unable to reverse with given block.");
     return result;
