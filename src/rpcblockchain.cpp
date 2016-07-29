@@ -5713,9 +5713,9 @@ Value reversecpidv2(const Array& params, bool fHelp)
     MiningCPID bb = DeserializeBoincBlock(block.vtx[0].hashBoinc);
     if(bb.Magnitude > 0 && bb.cpid != "INVESTOR" && pblockindex->IsProofOfStake() && bb.cpidv2.length() > 32){
         string combined = ReverseCPIDv2(bb.cpidv2, pblockindex->pprev->GetBlockHash());
-        result.push_back(Pair("CPID",bb.cpid));
-        result.push_back(Pair("Email",combined.substr(32,combined.length()-1)));
-        result.push_back(Pair("Cpidhash",combined.substr(0,32)));
+        result.push_back(Pair("eCPID",bb.cpid));
+        result.push_back(Pair("e-mail",combined.substr(32,combined.length()-1)));
+        result.push_back(Pair("iCPID",combined.substr(0,32)));
     }
     else throw runtime_error("Unable to reverse with given block.");
     return result;
@@ -5736,9 +5736,9 @@ Value bulkreversecpidv2(const Array& params, bool fHelp)
         if(bb.Magnitude > 0 && bb.cpid != "INVESTOR" && blockindex->IsProofOfStake() && bb.cpidv2.length() > 32){
             Object entry;
             string combined = ReverseCPIDv2(bb.cpidv2, blockindex->pprev->GetBlockHash());
-            entry.push_back(Pair("CPID",bb.cpid));
-            entry.push_back(Pair("Email",combined.substr(32,combined.length()-1)));
-            entry.push_back(Pair("Cpidhash",combined.substr(0,32)));    
+            entry.push_back(Pair("eCPID",bb.cpid));
+            entry.push_back(Pair("e-mail",combined.substr(32,combined.length()-1)));
+            entry.push_back(Pair("iCPID",combined.substr(0,32)));    
             values[bb.cpid] = entry;
         }  
         blockindex = blockindex->pprev;
