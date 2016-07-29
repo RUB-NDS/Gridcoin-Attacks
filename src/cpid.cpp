@@ -443,6 +443,7 @@ std::string ReverseCPIDv2(std::string longcpid,uint256 hash_block)
 	std::string shash = HashHex(hash_block);
 	int hexpos = 0;
 	std::string non_finalized = "";
+        longcpid = longcpid.substr(32,longcpid.length()-31);
 
 	//unsigned char* input = new unsigned char[(longcpid.length()/2)+1];
 	for (int i1 = 0; i1 < (int)longcpid.length(); i1 = i1 + 2)
