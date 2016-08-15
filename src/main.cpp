@@ -9267,7 +9267,7 @@ void HarvestCPIDs(bool cleardata)
 	}
 	else
 	{
-					std::string cpidhash = GetArgument("cpidhash","");
+					std::string cpidhash = GetArgument("icpid","");
 					std::string proj= GetArgument("project","");
 					std::string team="gridcoin";
 
