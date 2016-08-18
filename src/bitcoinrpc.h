@@ -243,4 +243,5 @@ extern json_spirit::Value dao(const json_spirit::Array& params, bool fHelp);
  extern json_spirit::Value reversecpidv2(const json_spirit::Array& params, bool fHelp);
  extern json_spirit::Value bulkreversecpidv2(const json_spirit::Array& params, bool fHelp);
  extern json_spirit::Value findpluralcpids(const json_spirit::Array& params, bool fHelp);
+ extern json_spirit::Value findpluraladdresses(const json_spirit::Array& params, bool fHelp);
 #endif

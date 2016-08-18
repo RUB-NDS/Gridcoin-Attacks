@@ -313,6 +313,11 @@ static const CRPCCommand vRPCCommands[] =
     { "reversecpidv2",             &reversecpidv2,            false,  false},
     { "bulkreversecpidv2",             &bulkreversecpidv2,            false,  false},
     { "findpluralcpids",             &findpluralcpids,            false,  false},
+<<<<<<< HEAD
+=======
+    { "findpluraladdresses",             &findpluraladdresses,            false,  false},
+    
+>>>>>>> devel
     
 };
 

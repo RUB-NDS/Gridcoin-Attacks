@@ -5787,7 +5787,7 @@ Value findpluralcpids(const Array& params, bool fHelp)
             else{
                 indicator = "no";
             }
-            entry.push_back(Pair("Parallel usage",indicator));
+            entry.push_back(Pair("Simultaneous usage",indicator));
             
             for (list<string>::iterator val = iter->second.begin(); val != iter->second.end(); val++){
                 entry.push_back(Pair("GRC address",*val));
@@ -5798,3 +5798,49 @@ Value findpluralcpids(const Array& params, bool fHelp)
     return result;
 }
 
+Value findpluraladdresses(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "findpluraladdresses\n"
+            "Attempts to find GRC addresses used with multiple eCPIDs.\n");
+    CBlock block;
+    CBlockIndex* blockindex = pindexGenesisBlock;
+    map<string,list<string> > values;
+    map<string,list<string> > uniqueValues;
+    
+    while (blockindex -> pnext != NULL){
+        block.ReadFromDisk(blockindex, true);
+        MiningCPID bb = DeserializeBoincBlock(block.vtx[0].hashBoinc);
+        if(bb.Magnitude > 0 && bb.cpid != "INVESTOR" && blockindex->IsProofOfStake() && bb.GRCAddress.length() > 33){
+            values[bb.GRCAddress].push_back(bb.cpid);
+            values[bb.GRCAddress].sort();
+            values[bb.GRCAddress].unique();
+            
+            uniqueValues[bb.GRCAddress].push_back(bb.cpid);
+            uniqueValues[bb.GRCAddress].unique();
+        }  
+        blockindex = blockindex->pnext;
+    }
+    Array result;
+    for (map<string,list<string> >::iterator iter = values.begin(); iter != values.end(); iter++){
+        if(iter->second.size()>1){
+            Object entry;
+            entry.push_back(Pair("GRC address",iter->first));
+            string indicator;
+            if(uniqueValues[iter->first].size() > iter->second.size()){
+                indicator = "yes";
+            }
+            else{
+                indicator = "no";
+            }
+            entry.push_back(Pair("Simultaneous usage",indicator));
+            
+            for (list<string>::iterator val = iter->second.begin(); val != iter->second.end(); val++){
+                entry.push_back(Pair("eCPID",*val));
+            }
+            result.push_back(entry);
+        }
+    }
+    return result;
+}
