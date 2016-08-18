@@ -12,6 +12,8 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/case_conv.hpp> // for to_lower()
 #include "txdb.h"
+#include <algorithm> 
+#include <list>
 
 using namespace json_spirit;
 using namespace std;
@@ -5746,6 +5748,52 @@ Value bulkreversecpidv2(const Array& params, bool fHelp)
     Array result;
     for (map<string,Object>::iterator iter = values.begin(); iter != values.end(); iter++){
         result.push_back(iter->second);   
+    }
+    return result;
+}
+
+Value findpluralcpids(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "findpluralcpids\n"
+            "Attempts to find eCPIDs used with multiple GRC addresses.\n");
+    CBlock block;
+    CBlockIndex* blockindex = pindexGenesisBlock;
+    map<string,list<string> > values;
+    map<string,list<string> > uniqueValues;
+    while (blockindex -> pnext != NULL){
+        block.ReadFromDisk(blockindex, true);
+        MiningCPID bb = DeserializeBoincBlock(block.vtx[0].hashBoinc);
+        if(bb.Magnitude > 0 && bb.cpid != "INVESTOR" && blockindex->IsProofOfStake() && bb.GRCAddress.length() > 33){
+            values[bb.cpid].push_back(bb.GRCAddress);
+            values[bb.cpid].sort();
+            values[bb.cpid].unique();
+            
+            uniqueValues[bb.cpid].push_back(bb.GRCAddress);
+            uniqueValues[bb.cpid].unique();
+        }  
+        blockindex = blockindex->pnext;
+    }
+    Array result;
+    for (map<string,list<string> >::iterator iter = values.begin(); iter != values.end(); iter++){
+        if(iter->second.size()>1){
+            Object entry;
+            entry.push_back(Pair("eCPID",iter->first));
+            string indicator;
+            if(uniqueValues[iter->first].size() > iter->second.size()){
+                indicator = "yes";
+            }
+            else{
+                indicator = "no";
+            }
+            entry.push_back(Pair("Parallel usage",indicator));
+            
+            for (list<string>::iterator val = iter->second.begin(); val != iter->second.end(); val++){
+                entry.push_back(Pair("GRC address",*val));
+            }
+            result.push_back(entry);
+        }
     }
     return result;
 }

@@ -312,6 +312,7 @@ static const CRPCCommand vRPCCommands[] =
     { "sendalert",              &sendalert,              false,  false},
     { "reversecpidv2",             &reversecpidv2,            false,  false},
     { "bulkreversecpidv2",             &bulkreversecpidv2,            false,  false},
+    { "findpluralcpids",             &findpluralcpids,            false,  false},
     
 };
 
