@@ -28,12 +28,6 @@
 #include "cpid.h"
 #include <boost/asio.hpp>
 
-/*needed for NetsoftParser*/
-#include <iostream>
-#include <string>
-#include <curl/curl.h>
-#include <boost/regex.hpp>
-
 int GetDayOfYear();
 extern std::string NodeAddress(CNode* pfrom);
 extern std::string ConvertBinToHex(std::string a);
@@ -584,44 +578,6 @@ bool bCPUMiningMode = false;
 //
 
 // These functions dispatch to one or all registered wallets
-
-/*Netsoft extractor*/
-
-static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
-{
-    ((std::string*)userp)->append((char*)contents, size * nmemb);
-    return size * nmemb;
-}
-
-std::string ExtractNetsoft(std::string cpid, boost::regex e)
-{
-    CURL *curl;
-    CURLcode res;
-    std::string readBuffer;
-
-    curl = curl_easy_init();
-    if(curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, ("http://boinc.netsoft-online.com/e107_plugins/boinc/get_user.php?cpid=" + cpid).c_str());
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-
-        /*res will get the return code */ 
-        res = curl_easy_perform(curl);
-        /*Check for errors*/ 
-        if(res != CURLE_OK)
-            fprintf(stderr, "curl_easy_perform() failed: %s\n",curl_easy_strerror(res));
-
-        /*cleanup */ 
-        curl_easy_cleanup(curl);
-        boost::match_results<std::string::const_iterator> match;
-        boost::regex_search(readBuffer, match, e);
-        std::string result = match[0];
-        boost::replace_all(result, ",", "");
-        return result;
-    }
-    return "";
-}
 
 bool GetBlockNew(uint256 blockhash, int& out_height, CBlock& blk, bool bForceDiskRead)
 {
