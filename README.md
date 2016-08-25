@@ -57,7 +57,8 @@ It contains various additional RPC functions and allows the user to reverse CPID
     3. Enter the targets credentials to steal Coin Reward
     4. Profit
 
-To enable attacking and attack detection, the following RPC functions were added:
+To enable attacking and attack detection, the following RPC functions were added.
+
     * reversecpidv2 number - Reverses CPIDv2 for a given blockhight
     * bulkreversecpidv2 - Attempts to reverse all CPIDv2s found in the blockchain
     * findpluralcpids - Attempts to find eCPIDs used with multiple GRC addresses
