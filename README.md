@@ -24,7 +24,7 @@ It contains various additional RPC functions and allows the user to reverse CPID
     Install the binary.
     $ make install -m 755 gridcoinresearchd /usr/bin/gridcoinresearchd
 
-##Configuration
+###Configuration
     Create configuration directory.
     $ mkdir ~/.GridcoinResearch
     $ cd ~/.GridcoinResearch
@@ -58,10 +58,10 @@ It contains various additional RPC functions and allows the user to reverse CPID
     4. Profit
 
 To enable attacking and attack detection, the following RPC functions were added:
-    *reversecpidv2 <number> - Reverses CPIDv2 for a given blockhight.
-    *bulkreversecpidv2 - Attempts to reverse all CPIDv2s found in the blockchain.
-    *findpluralcpids - Attempts to find eCPIDs used with multiple GRC addresses.
-    *findpluraladdresses - Attempts to find GRC addresses used with multiple eCPIDs.
+    * reversecpidv2 <number> - Reverses CPIDv2 for a given blockhight.
+    * bulkreversecpidv2 - Attempts to reverse all CPIDv2s found in the blockchain.
+    * findpluralcpids - Attempts to find eCPIDs used with multiple GRC addresses.
+    * findpluraladdresses - Attempts to find GRC addresses used with multiple eCPIDs.
 
 Once the target eCPID has been chosen get the corresponding e-mail address and iCPID by executing
     $gridcoinresearchd reversecpidv2 <number>
