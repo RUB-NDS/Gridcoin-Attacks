@@ -7,11 +7,9 @@ It contains various additional RPC functions and allows the user to reverse CPID
 
 - - - -
 
-Build and Install
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+##Build and Install
 
-Ubuntu | Arch
-----------------------------------------
+###Ubuntu | Arch
     Ensure that all dependencies are satisfied.
     Ubuntu:
     $ apt-get install ntp git build-essential libssl-dev libdb-dev libdb++-dev libboost-all-dev libqrencode-dev libcurl3-dev libzip-dev
@@ -26,8 +24,7 @@ Ubuntu | Arch
     Install the binary.
     $ make install -m 755 gridcoinresearchd /usr/bin/gridcoinresearchd
 
-Configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+##Configuration
     Create configuration directory.
     $ mkdir ~/.GridcoinResearch
     $ cd ~/.GridcoinResearch
@@ -45,8 +42,7 @@ Configuration
     Optional: Retrieve a snapshot of the Gridcoin Blockchain (saves time!)
     $ wget http://download.gridcoin.us/download/downloadstake/signed/snapshot.zip && unzip snapshot.zip && rm snapshot.zip
 
-First Run
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+##First Run
     Execute the installed binary.
     $ gridcoinresearchd
     
@@ -55,8 +51,7 @@ First Run
 
     If anything goes wrong, it might be helpful to check the debug log under ~/.GridcoinResearch/debug.log
 
-Attacking
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+##Attacking
     1. Choose a target
     2. Reverse one of the targets CPIDsv2
     3. Enter the targets credentials to steal Coin Reward
