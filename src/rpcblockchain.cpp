@@ -458,7 +458,7 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fPri
 	}
 	result.push_back(Pair("ClientVersion",bb.clientversion));	
 
-	if (!bb.cpidv2.empty()) 	result.push_back(Pair("CPIDv2",bb.cpidv2.substr(0,32)));
+	if (!bb.cpidv2.empty()) 	result.push_back(Pair("CPIDv2",bb.cpidv2));
 	bool IsCPIDValid2 = IsCPIDValidv2(bb,blockindex->nHeight);
 	result.push_back(Pair("CPIDValid",IsCPIDValid2));
 
@@ -5176,6 +5176,160 @@ Value getcheckpoint(const Array& params, bool fHelp)
     if (mapArgs.count("-checkpointkey"))
         result.push_back(Pair("checkpointmaster", true));
 
+    return result;
+}
+
+Value reversecpidv2(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() < 1 || params.size() > 2)
+        throw runtime_error(
+            "reversecpidv2 <number>\n"
+            "Reverses CPIDv2 for given blockhight in the blockchain.\n");
+    Object result;
+    
+    int nHeight = params[0].get_int();
+    if (nHeight < 0 || nHeight > nBestHeight)
+        throw runtime_error("Block number out of range.");
+
+    CBlock block;
+    CBlockIndex* pblockindex = mapBlockIndex[hashBestChain];
+    while (pblockindex->nHeight > nHeight)
+        pblockindex = pblockindex->pprev;
+
+    uint256 hash = *pblockindex->phashBlock;
+
+    pblockindex = mapBlockIndex[hash];
+    block.ReadFromDisk(pblockindex, true);
+    MiningCPID bb = DeserializeBoincBlock(block.vtx[0].hashBoinc);
+    if(bb.Magnitude > 0 && bb.cpid != "INVESTOR" && pblockindex->IsProofOfStake() && bb.cpidv2.length() > 32){
+        string combined = ReverseCPIDv2(bb.cpidv2, pblockindex->pprev->GetBlockHash());
+        result.push_back(Pair("eCPID",bb.cpid));
+        result.push_back(Pair("e-mail",combined.substr(32,combined.length()-1)));
+        result.push_back(Pair("iCPID",combined.substr(0,32)));
+    }
+    else throw runtime_error("Unable to reverse with given block.");
+    return result;
+}
+
+Value bulkreversecpidv2(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "bulkreversecpidv2\n"
+            "Attempts to reverse all CPIDv2s found in the blockchain.\n");
+    CBlock block;
+    CBlockIndex* blockindex = mapBlockIndex[hashBestChain];
+    map<string,Object> values;
+    while (blockindex -> pprev != NULL){
+        block.ReadFromDisk(blockindex, true);
+        MiningCPID bb = DeserializeBoincBlock(block.vtx[0].hashBoinc);
+        if(bb.Magnitude > 0 && bb.cpid != "INVESTOR" && blockindex->IsProofOfStake() && bb.cpidv2.length() > 32){
+            Object entry;
+            string combined = ReverseCPIDv2(bb.cpidv2, blockindex->pprev->GetBlockHash());
+            entry.push_back(Pair("eCPID",bb.cpid));
+            entry.push_back(Pair("e-mail",combined.substr(32,combined.length()-1)));
+            entry.push_back(Pair("iCPID",combined.substr(0,32)));    
+            values[bb.cpid] = entry;
+        }  
+        blockindex = blockindex->pprev;
+    }
+    Array result;
+    for (map<string,Object>::iterator iter = values.begin(); iter != values.end(); iter++){
+        result.push_back(iter->second);   
+    }
+    return result;
+}
+
+Value findpluralcpids(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "findpluralcpids\n"
+            "Attempts to find eCPIDs used with multiple GRC addresses.\n");
+    CBlock block;
+    CBlockIndex* blockindex = pindexGenesisBlock;
+    map<string,list<string> > values;
+    map<string,list<string> > uniqueValues;
+    while (blockindex -> pnext != NULL){
+        block.ReadFromDisk(blockindex, true);
+        MiningCPID bb = DeserializeBoincBlock(block.vtx[0].hashBoinc);
+        if(bb.Magnitude > 0 && bb.cpid != "INVESTOR" && blockindex->IsProofOfStake() && bb.GRCAddress.length() > 33){
+            values[bb.cpid].push_back(bb.GRCAddress);
+            values[bb.cpid].sort();
+            values[bb.cpid].unique();
+            
+            uniqueValues[bb.cpid].push_back(bb.GRCAddress);
+            uniqueValues[bb.cpid].unique();
+        }  
+        blockindex = blockindex->pnext;
+    }
+    Array result;
+    for (map<string,list<string> >::iterator iter = values.begin(); iter != values.end(); iter++){
+        if(iter->second.size()>1){
+            Object entry;
+            entry.push_back(Pair("eCPID",iter->first));
+            string indicator;
+            if(uniqueValues[iter->first].size() > iter->second.size()){
+                indicator = "yes";
+            }
+            else{
+                indicator = "no";
+            }
+            entry.push_back(Pair("Simultaneous usage",indicator));
+            
+            for (list<string>::iterator val = iter->second.begin(); val != iter->second.end(); val++){
+                entry.push_back(Pair("GRC address",*val));
+            }
+            result.push_back(entry);
+        }
+    }
+    return result;
+}
+
+Value findpluraladdresses(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "findpluraladdresses\n"
+            "Attempts to find GRC addresses used with multiple eCPIDs.\n");
+    CBlock block;
+    CBlockIndex* blockindex = pindexGenesisBlock;
+    map<string,list<string> > values;
+    map<string,list<string> > uniqueValues;
+    
+    while (blockindex -> pnext != NULL){
+        block.ReadFromDisk(blockindex, true);
+        MiningCPID bb = DeserializeBoincBlock(block.vtx[0].hashBoinc);
+        if(bb.Magnitude > 0 && bb.cpid != "INVESTOR" && blockindex->IsProofOfStake() && bb.GRCAddress.length() > 33){
+            values[bb.GRCAddress].push_back(bb.cpid);
+            values[bb.GRCAddress].sort();
+            values[bb.GRCAddress].unique();
+            
+            uniqueValues[bb.GRCAddress].push_back(bb.cpid);
+            uniqueValues[bb.GRCAddress].unique();
+        }  
+        blockindex = blockindex->pnext;
+    }
+    Array result;
+    for (map<string,list<string> >::iterator iter = values.begin(); iter != values.end(); iter++){
+        if(iter->second.size()>1){
+            Object entry;
+            entry.push_back(Pair("GRC address",iter->first));
+            string indicator;
+            if(uniqueValues[iter->first].size() > iter->second.size()){
+                indicator = "yes";
+            }
+            else{
+                indicator = "no";
+            }
+            entry.push_back(Pair("Simultaneous usage",indicator));
+            
+            for (list<string>::iterator val = iter->second.begin(); val != iter->second.end(); val++){
+                entry.push_back(Pair("eCPID",*val));
+            }
+            result.push_back(entry);
+        }
+    }
     return result;
 }
 

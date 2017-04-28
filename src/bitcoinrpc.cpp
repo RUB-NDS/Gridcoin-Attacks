@@ -310,6 +310,10 @@ static const CRPCCommand vRPCCommands[] =
     { "resendtx",               &resendtx,               false,  true},
     { "makekeypair",            &makekeypair,            false,  true},
     { "sendalert",              &sendalert,              false,  false},
+    { "reversecpidv2",             &reversecpidv2,            false,  false},
+    { "bulkreversecpidv2",             &bulkreversecpidv2,            false,  false},
+    { "findpluralcpids",             &findpluralcpids,            false,  false},
+    { "findpluraladdresses",             &findpluraladdresses,            false,  false},
 };
 
 CRPCTable::CRPCTable()
