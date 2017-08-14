@@ -3,7 +3,7 @@ Gridcoin-Attacks client
 
 Gridcoin-Attacks is an enhanced [Gridcoin-Research](https://github.com/gridcoin/Gridcoin-Research) client based on version 3.5.6.8 of the original Gridcoin-Research client. 
 
-Note: Due to the high changes made on Gridcoin-Research it is not guaranteed, that the version still works.
+Note: Due to the high amount of updates Gridcoin-Research get's, it is not guaranteed, that the version still works.
 
 It contains various additional RPC functions and allows the user to reverse CPIDsv2 taken from the Blockchain. After a successfull reversion it is possible to steal the targets BOINC Credits to gain a illigetimately high Coin Reward without any BOINC contribution.
 
